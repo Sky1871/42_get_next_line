@@ -6,7 +6,7 @@
 /*   By: kseltenr <kseltenr@student.42.fr>         #+#  +:+       +#+         */
 /*                                               +#+#+#+#+#+   +#+            */
 /*   Created: 2026/09/11 03:06:54 by kseltenr         #+#    #+#              */
-/*   Updated: 2026/09/11 04:06:27 by kseltenr        ###   ########.fr        */
+/*   Updated: 2026/09/17 22:39:52 by kseltenr        ###   ########.fr        */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,15 +79,11 @@ buffer	*create_node(int fd)
 	return (new_node);
 }
 
-char	*get_next_line(int fd)
+buffer	*find_node(int fd, buffer *buf)
 {
-	static buffer		buf;
-	buffer				*current;
-	char				*ret;
+	buffer	*current;
 
-	if (!buf.b_buf && !buf.next && buf.b_id == 0 && fd != 0)
-		buf.b_id = fd;
-	current = &buf;
+	current = buf;
 	while (current->b_id != fd)
 	{
 		if (current->next == NULL)
@@ -98,8 +94,7 @@ char	*get_next_line(int fd)
 			current = current->next;
 			break ;
 		}
-		else
-			current = current->next;
+		current = current->next;
 	}
 	if (!current->b_buf)
 	{
@@ -110,6 +105,16 @@ char	*get_next_line(int fd)
 			return (NULL);
 		current->b_buf[0] = '\0';
 	}
+	return (current);
+}
+
+char	*get_next_line(int fd)
+{
+	static buffer		buf;
+	buffer				*current;
+	char				*ret;
+
+	current = find_node(fd, &buf);
 	if (!current->b_buf)
 		return (NULL);
 	read_to_buf(fd, current);
@@ -123,6 +128,5 @@ char	*get_next_line(int fd)
 	}
 	ret = return_line(*current);
 	current->b_buf = delete_line(current, ft_strlen(ret));
-	
 	return (ret);
 }
