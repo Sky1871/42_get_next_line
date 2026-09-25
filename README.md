@@ -127,7 +127,7 @@ If a program only opens three files, this implementation only allocates three no
 # Instructions
 
 ## 1. Compilation
-Compile your files alongside the source files, defining the BUFFER_SIZE macro (optionally) using the -D flag
+Compile your files alongside the source files, defining the BUFFER_SIZE macro (optionally) using the -D flag.
 Mandatory part:
 ```bash
 cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c -o gnl
