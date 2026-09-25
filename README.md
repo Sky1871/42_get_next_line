@@ -128,17 +128,18 @@ If a program only opens three files, this implementation only allocates three no
 
 ## 1. Compilation
 Compile your files alongside the source files, defining the BUFFER_SIZE macro (optionally) using the -D flag.
-Mandatory part:
+- Mandatory part:
 ```bash
 cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c -o gnl
 ```
-Bonus part:
+- Bonus part:
 ```bash
 cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line_bonus.c get_next_line_utils_bonus.c main.c -o gnl
 ```
 
 ## 2. Example Usage
-Mandatory part:
+
+- Mandatory part:
 ```c
 #include "get_next_line_bonus.h"
 #include <fcntl.h>
@@ -162,7 +163,7 @@ int main(void)
     return (0);
 }
 ```
-Bonus part:
+- Bonus part:
 ```c
 #include "get_next_line_bonus.h"
 #include <fcntl.h>
