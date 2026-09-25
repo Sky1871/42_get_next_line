@@ -9,7 +9,7 @@ This projects is about creating a function that, allows to read a line ending wi
 ### Buffer structure
 
 At the heart of this project is the custom buffer struct defined in get_next_line.h:
-```
+```c
 typedef struct buffer
 {
     char    *b_buf; // The actual string data
