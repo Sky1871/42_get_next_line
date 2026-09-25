@@ -4,7 +4,7 @@
 
 This projects is about creating a function that, allows to read a line ending with a newline character  from a file descriptor, without knowing its size beforehand.
 
-## Mandatory part
+## Mandatory Part
 
 ### Buffer structure
 
@@ -19,7 +19,7 @@ typedef struct buffer
 ```
 At first I tried to implement it using a simple char * static variable and reallocating it on every read, but that was rather slow and inefficient, so I've decided to use this buffer structure instead. This implementation acts like a C++ std::vector. It tracks its capacity (`b_cap`) and its actual length (`b_len`). If new data fits within the existing capacity, it is simply appended without calling malloc. Memory is only reallocated when the buffer runs out of space.
 
-### Execution step-by-step
+### Execution Step-by-Step
 
 When `get_next_line(int fd)` is called, the program follows a 5-step lifecycle.
 
@@ -74,6 +74,50 @@ Before returning the extracted line, the static buffer must be updated so the ne
 
 ### Justification
 By carrying capacity metrics alongside the static buffer, this implementation drastically reduces the overhead of `malloc` and `free` operations, especially when reading files with very long lines or when compiled with a very small `BUFFER_SIZE`.
+
+## Bonus Part
+
+### Linked List Buffer Structure
+To handle multiple file descriptors without losing the reading thread of any of them, the buffer struct is expanded into a Linked List node:
+```c
+typedef struct buffer
+{
+    char            *b_buf; // The actual string data
+    int             b_len;  // The current length of the string
+    int             b_cap;  // The total allocated memory capacity
+    int             b_id;   // The File Descriptor (FD) associated with this buffer
+    struct buffer   *next;  // Pointer to the next buffer in the linked list
+}   buffer;
+```
+This structure retains the `b_len` and `b_cap` optimizations from the mandatory part (minimizing `malloc` calls) while adding `b_id` to identify which file is being read, and `next` to chain multiple files together.
+
+### Execution Step-by-Step
+When `get_next_line(int fd)` is called, the program executes the following lifecycle to ensure the correct file is processed:
+
+#### 1. The Static Head Node
+The function declares a single `static buffer buf;`. This static variable serves as the permanent head of the linked list across all function calls.
+
+#### 2. Locating the Correct File (`find_node` & `create_node`)
+Before reading any data, the program must find the buffer associated with the requested `fd`.
+
+- Traversal: `find_node` iterates through the linked list starting from the static `buf`. It checks if `current->b_id == fd`.
+
+- Creation: If it reaches the end of the list (`current->next == NULL`) without finding a match, it realizes this is the first time this `fd` is being read. It calls `create_node(fd)` to allocate a new node, initializes its capacity to 256 bytes, links it to the list, and assigns it the new `fd`.
+
+- The function returns a pointer to the exact `current` buffer node belonging to the requested file descriptor.
+
+#### 3. Reading and Vector-Style Appending (`read_to_buf`)
+Once the correct node is isolated, the reading process behaves exactly like the mandatory version, but operates strictly on `current`:
+
+- Data is read in chunks of `BUFFER_SIZE`.
+
+- `ft_strjoin` checks if the new chunk fits within `current->b_cap`. If it does, it appends it directly. If not, `ft_allocjoin` expands the capacity.
+
+#### 4. Extracting the Line (`return_line`)
+The function extracts the line up to the first `\n` or `\0` from `current->b_buf`. This isolation guarantees that reading from `fd 4` will never accidentally return data read from `fd 3`.
+
+#### 5. Node Cleanup (`delete_line`)
+After the line is extracted, `delete_line` trims the returned data from the beginning of `current->b_buf` and leaves the remaining text intact for the next time this specific `fd` is called. The node remains in the linked list for future reads.
 
 # Instructions
 
