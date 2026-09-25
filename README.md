@@ -85,7 +85,7 @@ typedef struct buffer
     char            *b_buf; // The actual string data
     int             b_len;  // The current length of the string
     int             b_cap;  // The total allocated memory capacity
-    int             b_id;   // The File Descriptor (FD) associated with this buffer
+    int             b_id;   // The File Descriptor (fd) associated with this buffer
     struct buffer   *next;  // Pointer to the next buffer in the linked list
 }   buffer;
 ```
@@ -119,6 +119,80 @@ The function extracts the line up to the first `\n` or `\0` from `current->b_buf
 #### 5. Node Cleanup (`delete_line`)
 After the line is extracted, `delete_line` trims the returned data from the beginning of `current->b_buf` and leaves the remaining text intact for the next time this specific `fd` is called. The node remains in the linked list for future reads.
 
+### Justification
+
+This linked list approach is much better for memory efficiency.
+If a program only opens three files, this implementation only allocates three nodes. It does not waste a bunch of empty array slots, like a static array would. Combined with the capacity-tracking vector logic (`b_cap`), this implementation dynamically scales both horizontally (adding new fds) and vertically (handling long lines) with minimal memory overhead and CPU cycles.
+
 # Instructions
+
+## 1. Compilation
+Compile your files alongside the source files, defining the BUFFER_SIZE macro (optionally) using the -D flag:
+```bash
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c -o gnl
+```
+or
+```bash
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line_bonus.c get_next_line_utils_bonus.c main.c -o gnl
+```
+
+## 2. Example Usage
+```c
+#include "get_next_line_bonus.h"
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    int     fd;
+    char    *line;
+
+    fd = open("file.txt", O_RDONLY);
+
+    while ((line = get_next_line(fd)) != NULL)
+    {
+        printf("fd: %s", line);
+        free(line);
+    }
+
+    close(fd);
+    return (0);
+}
+```
+or
+```c
+#include "get_next_line_bonus.h"
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    int     fd1;
+    int     fd2;
+    char    *line;
+
+    fd1 = open("file1.txt", O_RDONLY);
+    fd2 = open("file2.txt", O_RDONLY);
+
+    while ((line = get_next_line(fd1)) != NULL)
+    {
+        printf("FD1: %s", line);
+        free(line);
+        
+        line = get_next_line(fd2);
+        if (line)
+        {
+            printf("FD2: %s", line);
+            free(line);
+        }
+    }
+
+    close(fd1);
+    close(fd2);
+    return (0);
+}
+```
 
 # Resources
