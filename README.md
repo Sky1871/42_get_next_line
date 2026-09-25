@@ -178,13 +178,13 @@ int main(void)
 
     while ((line = get_next_line(fd1)) != NULL)
     {
-        printf("FD1: %s", line);
+        printf("fd1: %s", line);
         free(line);
         
         line = get_next_line(fd2);
         if (line)
         {
-            printf("FD2: %s", line);
+            printf("fd2: %s", line);
             free(line);
         }
     }
@@ -196,3 +196,5 @@ int main(void)
 ```
 
 # Resources
+
+I used manual pages and geeksforgeeks.org to understand certain conecpts better eg. read, malloc, free, linked lists.
