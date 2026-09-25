@@ -94,10 +94,10 @@ This structure retains the `b_len` and `b_cap` optimizations from the mandatory 
 ### Execution Step-by-Step
 When `get_next_line(int fd)` is called, the program executes the following lifecycle to ensure the correct file is processed:
 
-#### 1. The Static Head Node
+#### 1. Initialization
 The function declares a single `static buffer buf;`. This static variable serves as the permanent head of the linked list across all function calls.
 
-#### 2. Locating the Correct File (`find_node` & `create_node`)
+#### 2. Locating the File (`find_node` & `create_node`)
 Before reading any data, the program must find the buffer associated with the requested `fd`.
 
 - Traversal: `find_node` iterates through the linked list starting from the static `buf`. It checks if `current->b_id == fd`.
@@ -106,7 +106,7 @@ Before reading any data, the program must find the buffer associated with the re
 
 - The function returns a pointer to the exact `current` buffer node belonging to the requested file descriptor.
 
-#### 3. Reading and Vector-Style Appending (`read_to_buf`)
+#### 3. Reading and Appending (`read_to_buf`)
 Once the correct node is isolated, the reading process behaves exactly like the mandatory version, but operates strictly on `current`:
 
 - Data is read in chunks of `BUFFER_SIZE`.
